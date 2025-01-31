@@ -13,7 +13,7 @@ export default function Categories() {
   const [categories, setCategories] = useState<CategoryType[]>([]);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/categories")
+    fetch("https://changa.onrender.com/categories")
       .then((response) => response.json())
       .then((data) => setCategories(data.categories))
       .catch((error) => console.error("Error fetching categories:", error));
