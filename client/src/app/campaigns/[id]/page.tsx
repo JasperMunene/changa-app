@@ -62,7 +62,7 @@ export default function CampaignDetails() {
   const fetchCampaign = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://127.0.0.1:5000/campaigns/${id}`);
+      const response = await fetch(`https://changa.onrender.com/campaigns/${id}`);
       if (!response.ok) throw new Error("Failed to fetch campaign data.");
       const data = await response.json();
       setCampaign(data.campaign);
@@ -154,7 +154,7 @@ export default function CampaignDetails() {
 
     console.log(body);
 
-    fetch("http://localhost:5000/contributions", {
+    fetch("https://changa.onrender.com/contributions", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -185,7 +185,7 @@ export default function CampaignDetails() {
     if (!id) return;
 
     try {
-      const response = await fetch(`http://127.0.0.1:5000/campaigns/${id}`, {
+      const response = await fetch(`https://changa.onrender.com/campaigns/${id}`, {
         method: "DELETE",
       });
 
