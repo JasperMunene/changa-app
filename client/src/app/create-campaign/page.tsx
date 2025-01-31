@@ -28,7 +28,7 @@ export default function CreateCampaign() {
   const router = useRouter();
 
   useEffect(() => {
-      fetch("http://127.0.0.1:5000/categories")
+      fetch("https://changa.onrender.com/categories")
         .then((response) => response.json())
         .then((data) => setCategories(data.categories))
         .catch((error) => console.error("Error fetching categories:", error));
@@ -134,7 +134,7 @@ export default function CreateCampaign() {
     console.log('dattt:', payload)
 
    
-    const response = await fetch('http://127.0.0.1:5000/campaigns', {
+    const response = await fetch('https://changa.onrender.com/campaigns', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
