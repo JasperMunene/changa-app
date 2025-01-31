@@ -15,7 +15,7 @@ export default function PopularCampaigns() {
   const [campaigns, setCampaigns] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/campaigns")
+    fetch("https://changa.onrender.com/campaigns")
       .then((response) => response.json())
       .then((data) => setCampaigns(data.campaigns))
       .catch((error) => console.error("Error fetching campaigns:", error));
