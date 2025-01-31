@@ -69,14 +69,14 @@ export default function Campaigns() {
   };
 
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/categories")
+    fetch("https://changa.onrender.com/categories")
       .then((response) => response.json())
       .then((data) => setCategories(data.categories))
       .catch((error) => console.error("Error fetching categories:", error));
   }, []);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/campaigns")
+    fetch("https://changa.onrender.com/campaigns")
       .then((response) => response.json())
       .then((data) => setCampaigns(data.campaigns))
       .catch((error) => console.error("Error fetching campaigns:", error));
