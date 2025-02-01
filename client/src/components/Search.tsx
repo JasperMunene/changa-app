@@ -10,6 +10,7 @@ import Category from "@/types/Category";
 import CampaignResponse from "@/types/CampaignResponse";
 import Image from "next/image";
 import Link from "next/link";
+import { SignedIn, UserButton } from "@clerk/nextjs";
 
 
 
@@ -99,9 +100,9 @@ export default function SearchResults() {
               </Link>
             </div>
             <div className="flex items-center space-x-4">
-              <button className="p-2 rounded-full hover:bg-gray-100 transition-colors">
-                <User className="w-5 h-5 text-gray-600" />
-              </button>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
             </div>
           </div>
         </div>
