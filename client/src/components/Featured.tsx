@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Users } from "lucide-react";
 import Link from "next/link";
 import { Button } from "./ui/button";
+import CampaignResponse from "@/types/CampaignResponse";
+import Image from "next/image";
 
 
 export default function PopularCampaigns() {
@@ -12,7 +14,7 @@ export default function PopularCampaigns() {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
-  const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [campaigns, setCampaigns] = useState<CampaignResponse[]>([]);
 
   useEffect(() => {
     fetch("https://changa.onrender.com/campaigns")
@@ -126,8 +128,10 @@ export default function PopularCampaigns() {
                 className="flex-shrink-0 w-[350px] bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300"
               >
                 <div className="relative h-48 rounded-t-xl overflow-hidden">
-                  <img 
-                     src={images[0]?.url} 
+                  <Image 
+                     src={images[0]?.url}
+                     width={640}
+                     height={640} 
                      alt={title}
                     className="w-full h-full object-cover"
                   />

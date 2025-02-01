@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Raleway, } from "next/font/google";
-import { neobrutalism } from '@clerk/themes'
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 

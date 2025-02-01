@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { v2 as cloudinary } from "cloudinary";
+import { v2 as cloudinary, UploadApiResponse } from "cloudinary";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -7,10 +7,11 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+
 const uploadToCloudinary = (
   fileUri: string,
   fileName: string
-): Promise<{ success: boolean; result?: any; error?: any }> => {
+): Promise<{ success: boolean; result?: UploadApiResponse; error?: Error }> => {
   return new Promise((resolve) => {
     cloudinary.uploader
       .upload(fileUri, {
@@ -21,7 +22,7 @@ const uploadToCloudinary = (
         use_filename: true,
       })
       .then((result) => resolve({ success: true, result }))
-      .catch((error) => resolve({ success: false, error }));
+      .catch((error) => resolve({ success: false, error: error as Error }));
   });
 };
 
@@ -45,6 +46,7 @@ export async function POST(req: NextRequest) {
     const res = await uploadToCloudinary(fileUri, file.name);
 
     if (res.success && res.result) {
+      console.log(res.result)
       return NextResponse.json({
         message: "success",
         imgUrl: res.result.secure_url,
@@ -62,3 +64,6 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export const runtime = 'nodejs'; 
+

@@ -2,10 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Upload, Calendar, DollarSign, AlertCircle,  ChevronRight, Home, Loader2 } from "lucide-react";
+import { Upload, Calendar, DollarSign, AlertCircle,  ChevronRight, Home } from "lucide-react";
 import { SignedIn, UserButton, useUser } from "@clerk/nextjs";
 import { toast } from 'sonner';
 import { useRouter } from "next/navigation";
+import Category from "@/types/Category";
+import Link from "next/link";
+import Image from "next/image";
 
 
 export default function CreateCampaign() {
@@ -22,8 +25,7 @@ export default function CreateCampaign() {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const [categories, setCategories] = useState<any>([]);
-  const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
   const { user } = useUser();
   const router = useRouter();
 
@@ -157,17 +159,6 @@ export default function CreateCampaign() {
   }
 };
 
-if (loading) {
-  return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center">
-      <div className="text-center">
-        <Loader2 className="h-12 w-12 animate-spin text-emerald-600 mb-4 mx-auto" />
-      </div>
-    </div>
-  );
-}
-
-  
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -176,9 +167,9 @@ if (loading) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <a href="/" className="flex items-center">
+              <Link href="/" className="flex items-center">
                 <span className="text-2xl font-bold text-emerald-600">Changa</span>
-              </a>
+              </Link>
             </div>
             <div className="flex items-center space-x-4">
             <SignedIn>
@@ -194,15 +185,15 @@ if (loading) {
         <nav className="flex" aria-label="Breadcrumb">
           <ol className="flex items-center space-x-2">
             <li>
-              <a href="/" className="text-gray-500 hover:text-gray-700">
+              <Link href="/" className="text-gray-500 hover:text-gray-700">
                 <Home className="w-4 h-4" />
-              </a>
+              </Link>
             </li>
             <ChevronRight className="w-4 h-4 text-gray-400" />
             <li>
-              <a href="/campaigns" className="text-gray-500 hover:text-gray-700">
+              <Link href="/campaigns" className="text-gray-500 hover:text-gray-700">
                 Campaigns
-              </a>
+              </Link>
             </li>
             <ChevronRight className="w-4 h-4 text-gray-400" />
             <li className="text-gray-900 font-medium">Create Campaign</li>
@@ -238,9 +229,11 @@ if (loading) {
               >
                 {formData.imagePreview ? (
                   <div className="relative aspect-video w-full overflow-hidden rounded-lg">
-                    <img
+                    <Image
                       src={formData.imagePreview}
                       alt="Campaign preview"
+                      width={640}
+                      height={640}
                       className="w-full h-full object-cover"
                     />
                     <button

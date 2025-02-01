@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight } from "lucide-react";
+import Image from "next/image";
 
 const campaigns = [
   {
@@ -33,7 +34,6 @@ const campaigns = [
 
 export default function CampaignShowcase() {
   const [selectedCampaign, setSelectedCampaign] = useState(campaigns[0]);
-  const [isHovering, setIsHovering] = useState(false);
 
   return (
     <div className="relative w-full h-screen overflow-hidden">
@@ -117,15 +117,15 @@ export default function CampaignShowcase() {
               transition={{ duration: 0.5, delay: 0.1 * index }}
               onMouseEnter={() => {
                 setSelectedCampaign(campaign);
-                setIsHovering(true);
               }}
-              onMouseLeave={() => setIsHovering(false)}
               whileHover={{ scale: 1.05 }}
             >
               <div className="relative w-40 h-24">
-                <img 
+                <Image 
                   src={campaign.thumbnail} 
                   alt={campaign.title} 
+                  width={500}
+                  height={500}
                   className="w-full h-full object-cover"
                 />
                 <div className={`absolute inset-0 bg-black/40 transition-opacity duration-300

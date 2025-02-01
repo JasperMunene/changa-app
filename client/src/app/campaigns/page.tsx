@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Search, User, Home, ChevronRight, Filter, Users } from "lucide-react";
+import { Search,  Home, ChevronRight, Filter, Users } from "lucide-react";
 import { SignedIn, UserButton } from "@clerk/nextjs";
-
-// Sample data - replace with actual data from your backend
-
-
+import Category from "@/types/Category";
+import CampaignResponse from "@/types/CampaignResponse";
+import Link from "next/link";
+import Image from "next/image";
 
 
 export default function Campaigns() {
@@ -15,15 +15,15 @@ export default function Campaigns() {
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [sortBy, setSortBy] = useState("newest");
 
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
-  const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [campaigns, setCampaigns] = useState<CampaignResponse[]>([]);
   
 
   const filteredCampaigns = campaigns.filter(campaign => {
     const matchesSearch = campaign.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          campaign.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "All Categories" || campaign.category.name === selectedCategory;
+    const matchesCategory = selectedCategory === "All Categories" || campaign?.category?.name === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -89,17 +89,17 @@ export default function Campaigns() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <a href="/" className="flex items-center">
+              <Link href="/" className="flex items-center">
                 <span className="text-2xl font-bold text-emerald-600">Changa</span>
-              </a>
+              </Link>
             </div>
             <div className="flex items-center space-x-4">
-              <a 
+              <Link 
                 href="/create-campaign" 
                 className="bg-emerald-600 text-white px-2 md:px-4 py-2 rounded-lg font-medium hover:bg-emerald-700 transition-colors"
               >
                 Create Campaign
-              </a>
+              </Link>
               <SignedIn>
               <UserButton />
             </SignedIn>
@@ -113,9 +113,9 @@ export default function Campaigns() {
         <nav className="flex" aria-label="Breadcrumb">
           <ol className="flex items-center space-x-2">
             <li>
-              <a href="/" className="text-gray-500 hover:text-gray-700">
+              <Link href="/" className="text-gray-500 hover:text-gray-700">
                 <Home className="w-4 h-4" />
-              </a>
+              </Link>
             </li>
             <ChevronRight className="w-4 h-4 text-gray-400" />
             <li className="text-gray-900 font-medium">Campaigns</li>
@@ -145,7 +145,7 @@ export default function Campaigns() {
             <div className="flex flex-wrap gap-2">
               {categories.map((category) => (
                 <button
-                  key={category}
+                  key={category.id}
                   onClick={() => setSelectedCategory(category.name)}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                     selectedCategory === category.name
@@ -175,7 +175,6 @@ export default function Campaigns() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sortedCampaigns.map((campaign, index) => {
             const {
-              id,
               title,
               tagline,
               images,
@@ -198,14 +197,16 @@ export default function Campaigns() {
                 className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300"
               >
                 <div className="relative h-48 rounded-t-xl overflow-hidden">
-                  <img 
+                  <Image 
                     src={images[0]?.url} 
                     alt={title}
+                    width={640}
+                    height={640}
                     className="w-full h-full object-cover"
                   />
                  <div className="absolute top-4 right-4">
                     <span className="px-3 py-1 bg-white/90 rounded-full text-sm font-medium text-gray-700">
-                      {category.name}
+                      {category?.name}
                     </span>
                   </div>
                 </div>

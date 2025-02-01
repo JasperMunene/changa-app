@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from 'sonner';
@@ -19,6 +19,10 @@ import {
 import { SignedIn, UserButton, useUser } from "@clerk/clerk-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import CampaignResponse from "@/types/CampaignResponse";
+import Image from "next/image";
+import Reward from "@/types/Reward";
+import Contribution from "@/types/Contribution";
 
 const paymentMethods = [
   {
@@ -48,7 +52,7 @@ export default function CampaignDetails() {
     "story" | "rewards" | "contributions"
   >("story");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [campaign, setCampaign] = useState<any>(null);
+  const [campaign, setCampaign] = useState<CampaignResponse>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -59,25 +63,29 @@ export default function CampaignDetails() {
     name: user?.username || "",
   };
 
-  const fetchCampaign = async () => {
+  const fetchCampaign = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`https://changa.onrender.com/campaigns/${id}`);
       if (!response.ok) throw new Error("Failed to fetch campaign data.");
       const data = await response.json();
       setCampaign(data.campaign);
-      setLoading(false);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred.");
+      }
+    } finally {
       setLoading(false);
     }
-  };
-
+  }, [id]); 
+  
   useEffect(() => {
     if (!id) return;
-
     fetchCampaign();
-  }, [id]);
+  }, [id, fetchCampaign]);
+  
 
 
   const formatMoney = (amount: number) => {
@@ -88,13 +96,7 @@ export default function CampaignDetails() {
     }).format(amount);
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
+
 
   const countTime = (start: string, end: string): number => {
     const startDate = new Date(start);
@@ -225,11 +227,11 @@ export default function CampaignDetails() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <a href="/" className="flex items-center">
+              <Link href="/" className="flex items-center">
                 <span className="text-2xl font-bold text-emerald-600">
                   Changa
                 </span>
-              </a>
+              </Link>
             </div>
             <div className="flex items-center space-x-4">
               <SignedIn>
@@ -245,18 +247,18 @@ export default function CampaignDetails() {
         <nav className="flex" aria-label="Breadcrumb">
           <ol className="flex items-center space-x-2">
             <li>
-              <a href="/" className="text-gray-500 hover:text-gray-700">
+              <Link href="/" className="text-gray-500 hover:text-gray-700">
                 <Home className="w-4 h-4" />
-              </a>
+              </Link>
             </li>
             <ChevronRight className="w-4 h-4 text-gray-400" />
             <li>
-              <a
+              <Link
                 href="/campaigns"
                 className="text-gray-500 hover:text-gray-700"
               >
                 Campaigns
-              </a>
+              </Link>
             </li>
             <ChevronRight className="w-4 h-4 text-gray-400" />
             <li className="text-gray-900 font-medium truncate max-w-[200px]">
@@ -272,9 +274,11 @@ export default function CampaignDetails() {
           {/* Main Campaign Content */}
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-              <img
+              <Image
                 src={campaign.images[0]?.url || ""}
                 alt={campaign.title}
+                width={640}
+                height={640}
                 className="w-full h-[400px] object-cover"
               />
 
@@ -298,9 +302,11 @@ export default function CampaignDetails() {
                 </div>
 
                 <div className="flex items-center mt-4 space-x-4">
-                  <img
+                  <Image
                     src={campaign.creator.avatar_url || ""}
                     alt={campaign.title}
+                    height={100}
+                    width={100}
                     className="w-10 h-10 rounded-full"
                   />
                   <div>
@@ -345,7 +351,7 @@ export default function CampaignDetails() {
 
                 {activeTab === "rewards" && (
                   <div className="space-y-6">
-                    {campaign.rewards.map((reward: any) => (
+                    {campaign?.rewards?.map((reward: Reward) => (
                       <div
                         key={reward.id}
                         className="border-b border-gray-200 last:border-0 pb-6 last:pb-0"
@@ -366,7 +372,7 @@ export default function CampaignDetails() {
 
                 {activeTab === "contributions" && (
                   <div className="space-y-6">
-                    {campaign.contributions.map((contribution: any) => (
+                    {campaign?.contributions?.map((contribution: Contribution) => (
                       <div
                         key={contribution.id}
                         className="flex items-start space-x-4 border-b border-gray-200 last:border-0 pb-6 last:pb-0"
@@ -375,18 +381,18 @@ export default function CampaignDetails() {
                           <div className="flex justify-between items-start">
                             <div>
                               <p className="font-medium text-emerald-600">
-                                {contribution.contributor.name}
+                                {contribution?.contributor?.name}
                               </p>
                             </div>
                             <span className="font-medium text-emerald-600">
                               {formatMoney(contribution.amount)}
                             </span>
                           </div>
-                          {contribution.message && (
+                          {/* {contribution?.message && (
                             <p className="mt-2 text-gray-600">
-                              {contribution.message}
+                              {contribution?.message}
                             </p>
-                          )}
+                          )} */}
                         </div>
                       </div>
                     ))}
