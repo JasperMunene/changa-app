@@ -25,13 +25,13 @@ def make_users():
             clerk_id="clerk_user_id_2",
             email="jane@example.com",
             name="Jane Smith",
-            avatar_url="https://example.com/avatar2.jpg"
+            avatar_url="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&auto=format&fit=crop&q=60"
         ),
         User(
             clerk_id="clerk_user_id_3",
             email="alice@example.com",
             name="Alice Johnson",
-            avatar_url="https://example.com/avatar3.jpg"
+            avatar_url="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=800&auto=format&fit=crop&q=60"
         ),
     ]
     db.session.bulk_save_objects(users)
