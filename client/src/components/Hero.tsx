@@ -1,46 +1,37 @@
 'use client'
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight } from "lucide-react";
 import Image from "next/image";
+import CampaignResponse from "@/types/CampaignResponse";
 
-const campaigns = [
-  {
-    title: "Save the Rainforest",
-    description: "Join our mission to protect and preserve the Amazon rainforest for future generations.",
-    image: "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&q=80",
-    thumbnail: "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&q=80&w=200&h=150",
-    link: "#",
-    category: "Environment"
-  },
-  {
-    title: "Clean Ocean Initiative",
-    description: "Help us remove plastic waste from our oceans and protect marine life.",
-    image: "https://images.unsplash.com/photo-1498855926480-d98e83099315?auto=format&fit=crop&q=80",
-    thumbnail: "https://images.unsplash.com/photo-1498855926480-d98e83099315?auto=format&fit=crop&q=80&w=200&h=150",
-    link: "#",
-    category: "Ocean"
-  },
-  {
-    title: "Wildlife Protection",
-    description: "Support our efforts to protect endangered species and their habitats.",
-    image: "https://images.unsplash.com/photo-1564760055775-d63b17a55c44?auto=format&fit=crop&q=80",
-    thumbnail: "https://images.unsplash.com/photo-1564760055775-d63b17a55c44?auto=format&fit=crop&q=80&w=200&h=150",
-    link: "#",
-    category: "Wildlife"
-  }
-];
 
 export default function CampaignShowcase() {
-  const [selectedCampaign, setSelectedCampaign] = useState(campaigns[0]);
+  const [campaigns, setCampaigns] = useState<CampaignResponse[]>([]);
+  const [selectedCampaign, setSelectedCampaign] = useState<CampaignResponse | null>(null);
+  
+  
+  useEffect(() => {
+      fetch("https://changa.onrender.com/campaigns")
+        .then((response) => response.json())
+        .then((data) => setCampaigns(data.campaigns))
+        .catch((error) => console.error("Error fetching campaigns:", error));
+    }, []);
+
+
+    useEffect(() => {
+      if (campaigns.length > 0 && !selectedCampaign) {
+        setSelectedCampaign(campaigns[0]);
+      }
+    }, [campaigns, selectedCampaign]);
 
   return (
     <div className="relative w-full h-screen overflow-hidden">
       {/* Background Image with Smooth Transition */}
       <AnimatePresence mode="wait">
         <motion.div
-          key={selectedCampaign.image}
+          key={selectedCampaign?.images[0]?.url}
           className="absolute inset-0 w-full h-full"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -50,7 +41,7 @@ export default function CampaignShowcase() {
           <div 
             className="absolute inset-0 w-full h-full bg-cover bg-center transform scale-105 transition-transform duration-1000"
             style={{ 
-              backgroundImage: `url(${selectedCampaign.image})`,
+              backgroundImage: `url(${selectedCampaign?.images[0]?.url})`,
               filter: 'brightness(0.8)',
             }}
           />
@@ -63,7 +54,7 @@ export default function CampaignShowcase() {
       <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-end pb-24">
         {/* Campaign Info */}
         <motion.div
-          key={selectedCampaign.title}
+          key={selectedCampaign?.title}
           className="max-w-2xl mb-16"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -75,7 +66,7 @@ export default function CampaignShowcase() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            {selectedCampaign.category}
+            {selectedCampaign?.category?.name}
           </motion.span>
           <motion.h2
             className="text-5xl font-bold text-white mb-4 leading-tight"
@@ -83,7 +74,7 @@ export default function CampaignShowcase() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            {selectedCampaign.title}
+            {selectedCampaign?.title}
           </motion.h2>
           <motion.p
             className="text-lg text-gray-300 mb-8"
@@ -91,10 +82,10 @@ export default function CampaignShowcase() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
           >
-            {selectedCampaign.description}
+            {selectedCampaign?.tagline}
           </motion.p>
           <motion.a
-            href={selectedCampaign.link}
+            href={`https://changa-app.vercel.app/campaigns/${selectedCampaign?.id}`}
             className="group inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-lg text-lg font-medium transition-all duration-300 transform hover:translate-x-1"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -110,7 +101,7 @@ export default function CampaignShowcase() {
             <motion.div
               key={campaign.title}
               className={`relative rounded-lg overflow-hidden cursor-pointer transition-all duration-300
-                ${selectedCampaign.title === campaign.title ? 'ring-2 ring-emerald-400 ring-offset-2 ring-offset-black/50' : 'ring-1 ring-white/20'}
+                ${selectedCampaign?.title === campaign.title ? 'ring-2 ring-emerald-400 ring-offset-2 ring-offset-black/50' : 'ring-1 ring-white/20'}
               `}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -122,14 +113,14 @@ export default function CampaignShowcase() {
             >
               <div className="relative w-40 h-24">
                 <Image 
-                  src={campaign.thumbnail} 
-                  alt={campaign.title} 
+                  src={campaign?.images[0]?.url} 
+                  alt={campaign?.title} 
                   width={500}
                   height={500}
                   className="w-full h-full object-cover"
                 />
                 <div className={`absolute inset-0 bg-black/40 transition-opacity duration-300
-                  ${selectedCampaign.title === campaign.title ? 'opacity-0' : 'opacity-100'}
+                  ${selectedCampaign?.title === campaign.title ? 'opacity-0' : 'opacity-100'}
                 `} />
               </div>
             </motion.div>
