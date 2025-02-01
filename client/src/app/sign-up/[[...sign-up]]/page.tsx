@@ -5,18 +5,18 @@ import { Card } from "@/components/ui/card";
 
 export default function Page() {
   return (
-    <section className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-red-50 via-white to-red-100 p-4 relative overflow-hidden">
+    <section className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-emerald-100 p-4 relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-grid-black/[0.02] -z-10" />
       
       {/* Floating shapes for visual interest */}
-      <div className="absolute top-0 left-0 w-72 h-72 bg-red-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob" />
-      <div className="absolute top-0 right-0 w-72 h-72 bg-red-50 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000" />
-      <div className="absolute bottom-0 left-50 w-72 h-72 bg-red-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000" />
+      <div className="absolute top-0 left-0 w-72 h-72 bg-emerald-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob" />
+      <div className="absolute top-0 right-0 w-72 h-72 bg-emerald-50 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000" />
+      <div className="absolute bottom-0 left-50 w-72 h-72 bg-emerald-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000" />
 
       {/* Header/Logo */}
       <div className="absolute top-8 left-8 flex items-center space-x-2">
-        <span className="text-3xl font-bold text-red-600">Changa</span>
+        <span className="text-3xl font-bold text-emerald-600">Changa</span>
       </div>
 
       {/* Main Content */}
@@ -42,11 +42,11 @@ export default function Page() {
       {/* Footer */}
       <p className="mt-8 text-center text-sm text-gray-500">
         By signing up, you agree to our{" "}
-        <a href="#" className="font-medium text-red-600 hover:text-red-500">
+        <a href="#" className="font-medium text-emerald-600 hover:text-emerald-500">
           Terms of Service
         </a>{" "}
         and{" "}
-        <a href="#" className="font-medium text-red-600 hover:text-red-500">
+        <a href="#" className="font-medium text-emerald-600 hover:text-emerald-500">
           Privacy Policy
         </a>
       </p>
