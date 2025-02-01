@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 
 import { motion } from "framer-motion";
-import { Search, User, Home, ChevronRight, Users, Filter, ArrowLeft } from "lucide-react";
+import { Search, Home, ChevronRight, Users, Filter, ArrowLeft } from "lucide-react";
 import { useSearchParams } from 'next/navigation';
 import Category from "@/types/Category";
 import CampaignResponse from "@/types/CampaignResponse";
