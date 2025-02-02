@@ -6,6 +6,7 @@ from resources.user_resource import UserResource
 from resources.categories_resource import CategoryResource
 from resources.campaigns_resource import CampaignsResource, CampaignResource
 from resources.contributions_resource import ContributionResource
+from resources.user_resource import SpecificUser
 
 
 from models import db
@@ -27,6 +28,7 @@ class health(Resource):
 
 
 api.add_resource(UserResource, '/users')
+api.add_resource(SpecificUser, '/users/<string:clerk_id>')
 api.add_resource(CategoryResource, '/categories')
 api.add_resource(CampaignsResource, '/campaigns')
 api.add_resource(CampaignResource, '/campaigns/<int:id>')
@@ -35,4 +37,4 @@ api.add_resource(ContributionResource, '/contributions')
 api.add_resource(health, '/')
 
 if __name__ == '__main__':
-    app.run(port=4000)
+    app.run()

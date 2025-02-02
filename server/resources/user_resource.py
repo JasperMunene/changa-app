@@ -50,7 +50,8 @@ class UserResource(Resource):
             db.session.rollback()
             return {'error': 'Failed to create user', 'details': str(e)}, 500
 
-    def patch(self, user_id):
+class SpecificUser(Resource):
+    def patch(self, clerk_id):
         # Parse the input fields
         parser = reqparse.RequestParser()
         parser.add_argument('name', type=str, required=False, help="User's name")
@@ -59,7 +60,7 @@ class UserResource(Resource):
         args = parser.parse_args()
 
         # Find the user by ID
-        user = User.query.get(user_id)
+        user = User.query.get(clerk_id)
         if not user:
             return {'message': 'User not found'}, 404
 
@@ -74,7 +75,7 @@ class UserResource(Resource):
         # Save changes to the database
         db.session.commit()
         return {'message': 'User updated successfully', 'user': {
-            'id': user.id,
+            'id': user.clerk_id,
             'name': user.name,
             'email': user.email,
             'avatar_url': user.avatar_url
