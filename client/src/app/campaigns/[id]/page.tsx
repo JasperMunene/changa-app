@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { toast } from 'sonner';
+import { toast } from "sonner";
 import {
   Home,
   ChevronRight,
@@ -14,7 +14,8 @@ import {
   X,
   Loader2,
   CreditCard,
-  Wallet
+  Wallet,
+  Edit2,
 } from "lucide-react";
 import { SignedIn, UserButton, useUser } from "@clerk/clerk-react";
 import { Button } from "@/components/ui/button";
@@ -26,19 +27,18 @@ import Contribution from "@/types/Contribution";
 
 const paymentMethods = [
   {
-    id: 'card',
-    name: 'Credit Card',
+    id: "card",
+    name: "Credit Card",
     icon: CreditCard,
-    description: 'Pay with credit or debit card'
+    description: "Pay with credit or debit card",
   },
   {
-    id: 'crypto',
-    name: 'Cryptocurrency',
+    id: "crypto",
+    name: "Cryptocurrency",
     icon: Wallet,
-    description: 'Pay with Bitcoin, Ethereum, or other cryptocurrencies'
-  }
+    description: "Pay with Bitcoin, Ethereum, or other cryptocurrencies",
+  },
 ];
-
 
 export default function CampaignDetails() {
   const pageUrl = typeof window !== "undefined" ? window.location.href : "";
@@ -47,7 +47,9 @@ export default function CampaignDetails() {
   const router = useRouter();
   const [isContributeModalOpen, setIsContributeModalOpen] = useState(false);
   const [contributionAmount, setContributionAmount] = useState("");
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(paymentMethods[0].id);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(
+    paymentMethods[0].id
+  );
   const [activeTab, setActiveTab] = useState<
     "story" | "rewards" | "contributions"
   >("story");
@@ -55,8 +57,10 @@ export default function CampaignDetails() {
   const [campaign, setCampaign] = useState<CampaignResponse>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedCampaign, setEditedCampaign] = useState({
+    description: "",
+  });
 
   const currentUser = {
     id: user?.id || "",
@@ -66,7 +70,9 @@ export default function CampaignDetails() {
   const fetchCampaign = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(`https://changa.onrender.com/campaigns/${id}`);
+      const response = await fetch(
+        `https://changa.onrender.com/campaigns/${id}`
+      );
       if (!response.ok) throw new Error("Failed to fetch campaign data.");
       const data = await response.json();
       setCampaign(data.campaign);
@@ -79,14 +85,12 @@ export default function CampaignDetails() {
     } finally {
       setLoading(false);
     }
-  }, [id]); 
-  
+  }, [id]);
+
   useEffect(() => {
     if (!id) return;
     fetchCampaign();
   }, [id, fetchCampaign]);
-  
-
 
   const formatMoney = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -96,18 +100,16 @@ export default function CampaignDetails() {
     }).format(amount);
   };
 
-
-
   const countTime = (start: string, end: string): number => {
     const startDate = new Date(start);
     const endDate = new Date(end);
-  
+
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
       throw new Error("Invalid date format");
     }
-  
+
     const diff = endDate.getTime() - startDate.getTime();
-  
+
     return Math.round(diff / (1000 * 60 * 60 * 24));
   };
 
@@ -125,7 +127,9 @@ export default function CampaignDetails() {
     return (
       <div className="min-h-screen text-xl flex-col gap-5 flex items-center justify-center text-emerald-600">
         {error}
-        <Button><Link href='/'>Go back home</Link></Button>
+        <Button>
+          <Link href="/">Go back home</Link>
+        </Button>
       </div>
     );
   }
@@ -147,53 +151,83 @@ export default function CampaignDetails() {
 
     // Handle contribution logic here
     const body = {
-        "amount": contributionAmount,
-        "contributor_id": currentUser.id,  
-        "campaign_id": campaign.id,  
-        "payment_method": selectedPaymentMethod,
-        "status": "completed"
+      amount: contributionAmount,
+      contributor_id: currentUser.id,
+      campaign_id: campaign.id,
+      payment_method: selectedPaymentMethod,
+      status: "completed",
     };
 
     console.log(body);
 
     fetch("https://changa.onrender.com/contributions", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
     })
-    .then((response) => response.json()) 
-    .then((data) => {
-        console.log('Contribution success:', data);
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Contribution success:", data);
         toast.success("Thank you for contributing.");
 
-        
-        fetchCampaign();  
+        fetchCampaign();
 
         setIsContributeModalOpen(false);
         setContributionAmount("");
         setSelectedPaymentMethod(paymentMethods[0].id);
-    })
-    .catch((error) => {
-        console.error('Error with contribution:', error);
+      })
+      .catch((error) => {
+        console.error("Error with contribution:", error);
         toast.error("An error occurred while making a contribution.");
-    });
-};
+      });
+  };
 
+  const handleEdit = async () => {
+    if (!id || !editedCampaign) return;
 
+    console.log(JSON.stringify(editedCampaign))
+
+    try {
+      const response = await fetch(
+        `https://changa.onrender.com/campaigns/${id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(editedCampaign),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update campaign.");
+      }
+
+      toast.success("Campaign updated successfully.");
+      setIsEditing(false);
+      fetchCampaign(); // Refresh the campaign data
+    } catch (error) {
+      console.error("Error updating campaign:", error);
+      toast.error("An error occurred while updating the campaign.");
+    }
+  };
 
   const handleDelete = async () => {
     if (!id) return;
 
     try {
-      const response = await fetch(`https://changa.onrender.com/campaigns/${id}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `https://changa.onrender.com/campaigns/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (response.ok) {
         toast.success("Campaign deleted successfully.");
-        router.push('/campaigns'); 
+        router.push("/campaigns");
       } else {
         toast.error("Failed to delete the Campaign.");
       }
@@ -209,16 +243,15 @@ export default function CampaignDetails() {
       await navigator.clipboard.writeText(pageUrl);
       toast("Link Copied to clipboard!", {
         description: "You can now paste the link anywhere you like.",
-    });
+      });
     } catch (error) {
       console.error("Failed to copy the link: ", error);
       toast("Failed to copy the link. Please try again later.", {
-        description: "Make sure you have clipboard permissions enabled, or try again.",
-    });
+        description:
+          "Make sure you have clipboard permissions enabled, or try again.",
+      });
     }
   };
-
-
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -343,9 +376,22 @@ export default function CampaignDetails() {
               <div className="p-6">
                 {activeTab === "story" && (
                   <div className="prose max-w-none">
-                    <p className="whitespace-pre-line">
-                      {campaign.description}
-                    </p>
+                    {isEditing ? (
+                       <textarea
+                       className="w-full text-gray-700 leading-relaxed p-2 border border-gray-300 rounded"
+                       value={editedCampaign.description}
+                       onChange={(e) =>
+                         setEditedCampaign((prev) => ({
+                           ...prev,
+                           description: e.target.value,
+                         }))
+                       }
+                     />
+                    ) : (
+                      <p className="whitespace-pre-line">
+                        {campaign.description}
+                      </p>
+                    )}
                   </div>
                 )}
 
@@ -372,30 +418,32 @@ export default function CampaignDetails() {
 
                 {activeTab === "contributions" && (
                   <div className="space-y-6">
-                    {campaign?.contributions?.map((contribution: Contribution) => (
-                      <div
-                        key={contribution.id}
-                        className="flex items-start space-x-4 border-b border-gray-200 last:border-0 pb-6 last:pb-0"
-                      >
-                        <div className="flex-1">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <p className="font-medium text-emerald-600">
-                                {contribution?.contributor?.name}
-                              </p>
+                    {campaign?.contributions?.map(
+                      (contribution: Contribution) => (
+                        <div
+                          key={contribution.id}
+                          className="flex items-start space-x-4 border-b border-gray-200 last:border-0 pb-6 last:pb-0"
+                        >
+                          <div className="flex-1">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <p className="font-medium text-emerald-600">
+                                  {contribution?.contributor?.name}
+                                </p>
+                              </div>
+                              <span className="font-medium text-emerald-600">
+                                {formatMoney(contribution.amount)}
+                              </span>
                             </div>
-                            <span className="font-medium text-emerald-600">
-                              {formatMoney(contribution.amount)}
-                            </span>
-                          </div>
-                          {/* {contribution?.message && (
+                            {/* {contribution?.message && (
                             <p className="mt-2 text-gray-600">
                               {contribution?.message}
                             </p>
                           )} */}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      )
+                    )}
                   </div>
                 )}
               </div>
@@ -447,13 +495,32 @@ export default function CampaignDetails() {
 
               {isOwner ? (
                 <div className="space-y-3">
-                  <button
-                    onClick={() => setIsDeleteModalOpen(true)}
-                    className="w-full flex items-center justify-center gap-2 bg-red-100 text-red-600 px-6 py-3 rounded-lg font-medium hover:bg-red-200 transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    Delete Campaign
-                  </button>
+                  {isEditing ? (
+                    <Button
+                      onClick={handleEdit}
+                      className="w-full flex items-center justify-center gap-2 bg-emerald-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-emerald-700 transition-colors"
+                      size="lg"
+                    >
+                      Save Changes
+                    </Button>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => setIsEditing(true)}
+                        className="w-full flex items-center justify-center gap-2 bg-emerald-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-emerald-700 transition-colors"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                        Edit Campaign
+                      </button>
+                      <button
+                        onClick={() => setIsDeleteModalOpen(true)}
+                        className="w-full flex items-center justify-center gap-2 bg-red-100 text-red-600 px-6 py-3 rounded-lg font-medium hover:bg-red-200 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Delete Campaign
+                      </button>
+                    </>
+                  )}
                 </div>
               ) : (
                 <button
@@ -468,7 +535,7 @@ export default function CampaignDetails() {
         </div>
       </div>
 
-       {/* Contribute Modal  */}
+      {/* Contribute Modal  */}
       <AnimatePresence>
         {isContributeModalOpen && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
@@ -479,7 +546,9 @@ export default function CampaignDetails() {
               className="bg-white rounded-xl shadow-lg max-w-md w-full"
             >
               <div className="flex justify-between items-center p-6 border-b border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-900">Make a Contribution</h2>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Make a Contribution
+                </h2>
                 <button
                   onClick={() => setIsContributeModalOpen(false)}
                   className="text-gray-400 hover:text-gray-500"
@@ -490,7 +559,10 @@ export default function CampaignDetails() {
 
               <form onSubmit={handleContribute} className="p-6 space-y-6">
                 <div>
-                  <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="amount"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     Contribution Amount
                   </label>
                   <div className="relative">
@@ -523,8 +595,8 @@ export default function CampaignDetails() {
                           key={method.id}
                           className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${
                             selectedPaymentMethod === method.id
-                              ? 'border-emerald-500 bg-emerald-50'
-                              : 'border-gray-200 hover:border-gray-300'
+                              ? "border-emerald-500 bg-emerald-50"
+                              : "border-gray-200 hover:border-gray-300"
                           }`}
                         >
                           <input
@@ -532,27 +604,37 @@ export default function CampaignDetails() {
                             name="paymentMethod"
                             value={method.id}
                             checked={selectedPaymentMethod === method.id}
-                            onChange={(e) => setSelectedPaymentMethod(e.target.value)}
+                            onChange={(e) =>
+                              setSelectedPaymentMethod(e.target.value)
+                            }
                             className="sr-only"
                           />
                           <div className="flex items-center gap-3 flex-1">
-                            <div className={`p-2 rounded-full ${
-                              selectedPaymentMethod === method.id
-                                ? 'bg-emerald-500 text-white'
-                                : 'bg-gray-100 text-gray-500'
-                            }`}>
+                            <div
+                              className={`p-2 rounded-full ${
+                                selectedPaymentMethod === method.id
+                                  ? "bg-emerald-500 text-white"
+                                  : "bg-gray-100 text-gray-500"
+                              }`}
+                            >
                               <Icon className="w-5 h-5" />
                             </div>
                             <div>
-                              <p className="font-medium text-gray-900">{method.name}</p>
-                              <p className="text-sm text-gray-500">{method.description}</p>
+                              <p className="font-medium text-gray-900">
+                                {method.name}
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                {method.description}
+                              </p>
                             </div>
                           </div>
-                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                            selectedPaymentMethod === method.id
-                              ? 'border-emerald-500'
-                              : 'border-gray-300'
-                          }`}>
+                          <div
+                            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                              selectedPaymentMethod === method.id
+                                ? "border-emerald-500"
+                                : "border-gray-300"
+                            }`}
+                          >
                             {selectedPaymentMethod === method.id && (
                               <div className="w-3 h-3 rounded-full bg-emerald-500" />
                             )}
@@ -575,7 +657,6 @@ export default function CampaignDetails() {
           </div>
         )}
       </AnimatePresence>
-
 
       {/* Delete Confirmation Modal */}
       <AnimatePresence>
