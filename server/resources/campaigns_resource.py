@@ -131,10 +131,6 @@ class CampaignsResource(Resource):
                 201
             )
 
-        except IntegrityError as ie:
-            db.session.rollback()
-            return make_response(jsonify({"error": "Database integrity error. Check your inputs."}), 400)
-
         except Exception as e:
             db.session.rollback()
             return make_response(jsonify({"error": str(e)}), 500)
@@ -228,5 +224,67 @@ class CampaignResource(Resource):
             db.session.rollback()  # Rollback in case of error
             return make_response(jsonify({"error": str(e)}), 500)
 
+    def patch(self, id):
+        # Parse the input data for updates
+        parser = reqparse.RequestParser()
+        parser.add_argument("title", type=str, required=False, help="Title of the campaign")
+        parser.add_argument("tagline", type=str, required=False, help="Tagline of the campaign")
+        parser.add_argument("description", type=str, required=False, help="Description of the campaign")
+        parser.add_argument("goal_amount", type=float, required=False, help="Goal amount of the campaign")
+        parser.add_argument("end_date", type=str, required=False, help="End date of the campaign in YYYY-MM-DD format")
+        parser.add_argument("category_id", type=int, required=False, help="Category ID of the campaign")
+        parser.add_argument("images", action='append', help="List of image URLs")
+
+        args = parser.parse_args()
+
+        try:
+            # Fetch the campaign by ID
+            campaign = Campaign.query.get(id)
+            if not campaign:
+                return make_response(jsonify({"error": "Campaign not found"}), 404)
+
+            # Update campaign fields if provided in the request
+            if args["title"]:
+                campaign.title = args["title"].strip()
+            if args["tagline"]:
+                campaign.tagline = args["tagline"].strip()
+            if args["description"]:
+                campaign.description = args["description"].strip()
+            if args["goal_amount"]:
+                campaign.goal_amount = args["goal_amount"]
+            if args["end_date"]:
+                try:
+                    campaign.end_date = datetime.strptime(args["end_date"], "%Y-%m-%d")
+                except ValueError:
+                    return make_response(jsonify({"error": "Invalid date format. Use YYYY-MM-DD."}), 400)
+            if args["category_id"]:
+                category = Category.query.get(args["category_id"])
+                if not category:
+                    return make_response(jsonify({"error": f"Category with ID {args['category_id']} does not exist."}),
+                                         400)
+                campaign.category_id = args["category_id"]
+
+            # Add or update images
+            if args["images"]:
+                # Clear previous images
+                Image.query.filter_by(campaign_id=id).delete()
+                # Add new images
+                for img_url in args["images"]:
+                    new_image = Image(url=img_url.strip(), campaign_id=id)
+                    db.session.add(new_image)
+
+            # Commit the changes to the database
+            db.session.commit()
+
+            # Return a success message
+            return jsonify({
+                "message": "Campaign updated successfully",
+                "campaign_id": campaign.id,
+                "updated_at": datetime.utcnow().isoformat()
+            })
+
+        except Exception as e:
+            db.session.rollback()  # Rollback in case of error
+            return make_response(jsonify({"error": str(e)}), 500)
 
 
